@@ -182,7 +182,7 @@ Resources:
                   cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
       Environment: 
         Variables:
-          GitRepo: https://github.com/aws-solutions-library-samples/guidance-for-external-connectivity-amazon-vpc-lattice.git
+          GitRepo: https://github.com/PetrMc/guidance-for-external-connectivity-amazon-vpc-lattice.git
           s3Bucket: !Ref LatticeIngressBucket
       Handler: index.lambda_handler
       Runtime: python3.8

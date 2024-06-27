@@ -1,0 +1,29 @@
+arn:aws:acm:ap-northeast-2:835335437537:certificate/f44cfca9-484a-493a-be22-6da985dc998e
+
+export CERTIFICATE_ARN=arn:aws:acm:us-west-2:835335437537:certificate/8a3df958-1caa-4ad4-a3f1-941f940b2612
+export CERTIFICATE_ARN=arn:aws:acm:us-west-1:835335437537:certificate/98a6c062-2c3f-4510-ab47-408b7a81bcfa
+export CERTIFICATE_ARN=arn:aws:acm:us-east-2:835335437537:certificate/dd110d3b-c786-4741-88ca-0c23cec76a45
+export CUSTOM_DOMAIN_NAME=example.lattice.k8mesh.com 
+export AWS_PROFILE=marketplace
+export AWS_REGION=us-east-2
+aws cloudformation deploy --template-file ./vpc-lattice_example/vpc-lattice_service.yml --stack-name vpclattice-service-example --parameter-overrides CustomDomainName="$CUSTOM_DOMAIN_NAME" CertificateArn="$CERTIFICATE_ARN" --capabilities CAPABILITY_IAM
+export VPCLATTICE_SERVICE_NETWORK=arn:aws:vpc-lattice:us-west-1:835335437537:servicenetwork/sn-02cd1d876a039b03f
+export VPCLATTICE_SERVICE_NETWORK=arn:aws:vpc-lattice:us-east-2:835335437537:servicenetwork/sn-0e439d33517026b22
+aws cloudformation deploy --template-file ./guidance-stack.yml --stack-name guidance-vpclattice-pipeline --parameter-overrides VPCLatticeServiceNetwork=$VPCLATTICE_SERVICE_NETWORK --capabilities CAPABILITY_IAM
+curl http://guidan-nginx-r4r0usp87hg3-63432fed4a5a07c7.elb.us-west-2.amazonaws.com \
+    --aws-sigv4 "aws:amz:${AWS_REGION}:vpc-lattice-svcs" \
+    --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" \
+    --header "x-amz-security-token:$AWS_SESSION_TOKEN" \
+    --header "x-amz-content-sha256:UNSIGNED-PAYLOAD"
+
+curl -4 guidan-nginx-r4r0usp87hg3-63432fed4a5a07c7.elb.us-west-2.amazonaws.com \
+    --aws-sigv4 "aws:amz:us-west-2:vpc-lattice-svcs" \
+    --user "$AWS_ACCESS_KEY_ID:$AWS_SECRET_ACCESS_KEY" \
+    --header "x-amz-security-token:$AWS_SESSION_TOKEN" \
+    --header "x-amz-content-sha256:UNSIGNED-PAYLOAD"
+
+curl -4 guidan-nginx-r4r0usp87hg3-63432fed4a5a07c7.elb.us-west-2.amazonaws.com -H "Host: vpc-lattice-service-0daa98667cedd8642.7d67968.vpc-lattice-svcs.us-west-2.on.aws"
+
+aws cloudformation delete-stack --stack-name guidance-vpclattice-pipeline-835335437537-ecs
+
+guidance-vpclattice-pipeline-835335437537-ecs
